@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    var onLogout: () -> Void = {}
+    @AppStorage(AppSettingsKeys.loggedIn) private var isLoggedIn = false
 
     private var appVersion: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
@@ -53,7 +53,7 @@ struct SettingsView: View {
 
             Section {
                 Button(role: .destructive) {
-                    onLogout()
+                    isLoggedIn = false
                 } label: {
                     HStack {
                         Spacer()

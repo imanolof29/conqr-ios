@@ -9,21 +9,27 @@ import SwiftUI
 
 @main
 struct ConqrApp: App {
+    @AppStorage(AppSettingsKeys.loggedIn) private var isLoggedIn = false
+
     var body: some Scene {
         WindowGroup {
-            TabView {
-                ConqrMapView()
-                    .tabItem {
-                        Label("Map", systemImage: "map")
-                    }
-                WorkoutListView()
-                    .tabItem {
-                        Label("Workouts", systemImage: "list.bullet")
-                    }
-                ProfileView()
-                    .tabItem {
-                        Label("Profile", systemImage: "person")
-                    }
+            if isLoggedIn {
+                TabView {
+                    ConqrMapView()
+                        .tabItem {
+                            Label("Map", systemImage: "map")
+                        }
+                    WorkoutListView()
+                        .tabItem {
+                            Label("Workouts", systemImage: "list.bullet")
+                        }
+                    ProfileView()
+                        .tabItem {
+                            Label("Profile", systemImage: "person")
+                        }
+                }
+            } else {
+                LoginView()
             }
         }
     }
