@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct ConqrApp: App {
@@ -32,5 +33,6 @@ struct ConqrApp: App {
                 LoginView()
             }
         }
+        .modelContainer(for: [ActivityRecord.self, RouteLocation.self])
     }
 }

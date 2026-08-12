@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum ActivityType: CaseIterable, Identifiable, Equatable {
+enum ActivityType: String, CaseIterable, Identifiable, Codable, Equatable {
     case walk
     case run
     case cycle
