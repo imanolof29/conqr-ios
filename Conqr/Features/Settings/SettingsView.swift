@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage(AppSettingsKeys.loggedIn) private var isLoggedIn = false
+    @Environment(AuthManager.self) private var authManager
 
     private var appVersion: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
@@ -53,7 +53,9 @@ struct SettingsView: View {
 
             Section {
                 Button(role: .destructive) {
-                    isLoggedIn = false
+                    Task {
+                        await authManager.signOut()
+                    }
                 } label: {
                     HStack {
                         Spacer()
@@ -71,5 +73,6 @@ struct SettingsView: View {
 #Preview {
     NavigationStack {
         SettingsView()
+            .environment(AuthManager(tokenStore: KeychainTokenStore()))
     }
 }

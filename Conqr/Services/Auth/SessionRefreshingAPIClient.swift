@@ -1,5 +1,5 @@
 //
-//  SessionRefreshingNetworkClient.swift
+//  SessionRefreshingAPIClient.swift
 //  Conqr
 //
 //  Created by Imanol Ortiz on 12/08/2026.
@@ -7,25 +7,26 @@
 
 import Foundation
 
+
 @MainActor
-final class SessionRefreshingNetworkClient: NetworkClientProtocol {
-    private let inner: NetworkClientProtocol
+final class SessionRefreshingAPIClient: APIClientProtocol {
+    private let inner: APIClientProtocol
     private let tokenStore: AuthTokenStoring
     private let onSessionExpired: () -> Void
     private var refreshTask: Task<Void, Error>?
 
-    init(inner: NetworkClientProtocol, tokenStore: AuthTokenStoring, onSessionExpired: @escaping () -> Void) {
+    init(inner: APIClientProtocol, tokenStore: AuthTokenStoring, onSessionExpired: @escaping () -> Void) {
         self.inner = inner
         self.tokenStore = tokenStore
         self.onSessionExpired = onSessionExpired
     }
 
-    func send<E: Endpoint, Response: Decodable>(_ endpoint: E) async throws -> Response {
+    func execute<Response: Decodable>(_ requestModel: APIRequest<Response>) async throws -> Response {
         do {
-            return try await inner.send(endpoint)
-        } catch NetworkError.unauthorized where endpoint.requiresAuth {
+            return try await inner.execute(requestModel)
+        } catch NetworkError.unauthorized where requestModel.requiresAuth {
             try await refreshSession()
-            return try await inner.send(endpoint)
+            return try await inner.execute(requestModel)
         }
     }
 
@@ -47,7 +48,13 @@ final class SessionRefreshingNetworkClient: NetworkClientProtocol {
         }
 
         do {
-            let response: AuthResponseDTO = try await inner.send(AuthEndpoint.refresh(refreshToken: refreshToken))
+            let requestModel = try APIRequest<AuthResponseDTO>(
+                method: .post,
+                route: .auth(.refresh),
+                requiresAuth: false,
+                body: RefreshPayload(refreshToken: refreshToken)
+            )
+            let response = try await inner.execute(requestModel)
             tokenStore.save(accessToken: response.accessToken, refreshToken: response.refreshToken)
         } catch {
             onSessionExpired()

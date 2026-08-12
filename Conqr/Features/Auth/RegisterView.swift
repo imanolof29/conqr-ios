@@ -9,13 +9,11 @@ import SwiftUI
 
 struct RegisterView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var authService = AuthService.live()
+    @Environment(AuthManager.self) private var authManager
 
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
-    @State private var errorMessage: String?
-    @State private var isSubmitting = false
 
     private var isEmailValid: Bool {
         email.contains("@") && email.contains(".")
@@ -23,6 +21,17 @@ struct RegisterView: View {
 
     private var isPasswordValid: Bool {
         password.count >= 8
+    }
+
+    private var isSubmitting: Bool {
+        authManager.authState == .inProgress(.signUp)
+    }
+
+    private var errorMessage: String? {
+        if case .failed(.signUp, let message) = authManager.authState {
+            return message
+        }
+        return nil
     }
 
     private var canSubmit: Bool {
@@ -88,23 +97,19 @@ struct RegisterView: View {
         }
         .padding(24)
         .disabled(isSubmitting)
+        .onDisappear {
+            authManager.resetAuthState()
+        }
     }
 
     private func submit() {
-        errorMessage = nil
-        isSubmitting = true
-
         Task {
-            do {
-                try await authService.signUp(email: email, password: password)
-            } catch {
-                errorMessage = (error as? LocalizedError)?.errorDescription ?? "No se pudo crear la cuenta. Intenta de nuevo."
-            }
-            isSubmitting = false
+            await authManager.signUp(email: email, password: password)
         }
     }
 }
 
 #Preview {
     RegisterView()
+        .environment(AuthManager(tokenStore: KeychainTokenStore()))
 }

@@ -8,13 +8,22 @@
 import SwiftUI
 
 struct LoginView: View {
-    @StateObject private var authService = AuthService.live()
+    @Environment(AuthManager.self) private var authManager
 
     @State private var email = ""
     @State private var password = ""
-    @State private var errorMessage: String?
-    @State private var isSubmitting = false
     @State private var showsRegister = false
+
+    private var isSubmitting: Bool {
+        authManager.authState == .inProgress(.signIn)
+    }
+
+    private var errorMessage: String? {
+        if case .failed(.signIn, let message) = authManager.authState {
+            return message
+        }
+        return nil
+    }
 
     private var canSubmit: Bool {
         !email.isEmpty && !password.isEmpty && !isSubmitting
@@ -71,20 +80,13 @@ struct LoginView: View {
     }
 
     private func submit() {
-        errorMessage = nil
-        isSubmitting = true
-
         Task {
-            do {
-                try await authService.signIn(email: email, password: password)
-            } catch {
-                errorMessage = (error as? LocalizedError)?.errorDescription ?? "No se pudo iniciar sesión. Intenta de nuevo."
-            }
-            isSubmitting = false
+            await authManager.signIn(email: email, password: password)
         }
     }
 }
 
 #Preview {
     LoginView()
+        .environment(AuthManager(tokenStore: KeychainTokenStore()))
 }
