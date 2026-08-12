@@ -51,11 +51,28 @@
 			);
 			target = 8485C154302CD6A500B297E7 /* ConqrWidgetExtension */;
 		};
+		8485C170302CD6A700B297E7 /* Exceptions for "ConqrWidget" folder in "Conqr" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ConqrWidgetAttributes.swift,
+			);
+			target = 8485C043302CC0AE00B297E7 /* Conqr */;
+		};
+		8485C171302CD6A700B297E7 /* Exceptions for "Conqr" folder in "ConqrWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/ActivityType.swift,
+			);
+			target = 8485C154302CD6A500B297E7 /* ConqrWidgetExtension */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8485C046302CC0AE00B297E7 /* Conqr */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8485C171302CD6A700B297E7 /* Exceptions for "Conqr" folder in "ConqrWidgetExtension" target */,
+			);
 			path = Conqr;
 			sourceTree = "<group>";
 		};
@@ -63,6 +80,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				8485C168302CD6A700B297E7 /* Exceptions for "ConqrWidget" folder in "ConqrWidgetExtension" target */,
+				8485C170302CD6A700B297E7 /* Exceptions for "ConqrWidget" folder in "Conqr" target */,
 			);
 			path = ConqrWidget;
 			sourceTree = "<group>";

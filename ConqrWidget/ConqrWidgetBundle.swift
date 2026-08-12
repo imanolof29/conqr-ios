@@ -11,7 +11,6 @@ import SwiftUI
 @main
 struct ConqrWidgetBundle: WidgetBundle {
     var body: some Widget {
-        ConqrWidget()
         ConqrWidgetLiveActivity()
     }
 }

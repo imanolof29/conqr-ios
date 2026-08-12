@@ -6,75 +6,88 @@
 //
 
 import ActivityKit
+import AppIntents
 import WidgetKit
 import SwiftUI
-
-struct ConqrWidgetAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-        // Dynamic stateful properties about your activity go here!
-        var emoji: String
-    }
-
-    // Fixed non-changing properties about your activity go here!
-    var name: String
-}
 
 struct ConqrWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: ConqrWidgetAttributes.self) { context in
-            // Lock screen/banner UI goes here
-            VStack {
-                Text("Hello \(context.state.emoji)")
-            }
-            .activityBackgroundTint(Color.cyan)
-            .activitySystemActionForegroundColor(Color.black)
+            LockScreenLiveActivityView(context: context)
+                .activityBackgroundTint(Color.black.opacity(0.8))
+                .activitySystemActionForegroundColor(Color.white)
 
         } dynamicIsland: { context in
             DynamicIsland {
-                // Expanded UI goes here.  Compose the expanded UI through
-                // various regions, like leading/trailing/center/bottom
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("Leading")
+                    Label(context.attributes.activityType.title, systemImage: context.attributes.activityType.icon)
+                        .foregroundStyle(context.attributes.activityType.color)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("Trailing")
+                    Text(timerInterval: context.attributes.startDate...Date.distantFuture, countsDown: false)
+                        .monospacedDigit()
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom \(context.state.emoji)")
-                    // more content
+                    Button(intent: FinishWorkoutIntent()) {
+                        Label("Finalizar", systemImage: "stop.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .tint(.red)
                 }
             } compactLeading: {
-                Text("L")
+                Image(systemName: context.attributes.activityType.icon)
+                    .foregroundStyle(context.attributes.activityType.color)
             } compactTrailing: {
-                Text("T \(context.state.emoji)")
+                Text(timerInterval: context.attributes.startDate...Date.distantFuture, countsDown: false)
+                    .monospacedDigit()
+                    .frame(width: 44)
             } minimal: {
-                Text(context.state.emoji)
+                Image(systemName: context.attributes.activityType.icon)
+                    .foregroundStyle(context.attributes.activityType.color)
             }
-            .widgetURL(URL(string: "http://www.apple.com"))
-            .keylineTint(Color.red)
+            .keylineTint(context.attributes.activityType.color)
         }
+    }
+}
+
+private struct LockScreenLiveActivityView: View {
+    let context: ActivityViewContext<ConqrWidgetAttributes>
+
+    var body: some View {
+        HStack {
+            Label(context.attributes.activityType.title, systemImage: context.attributes.activityType.icon)
+                .font(.headline)
+                .foregroundStyle(context.attributes.activityType.color)
+
+            Spacer()
+
+            Text(timerInterval: context.attributes.startDate...Date.distantFuture, countsDown: false)
+                .font(.title2.monospacedDigit())
+
+            Button(intent: FinishWorkoutIntent()) {
+                Label("Finalizar", systemImage: "stop.fill")
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.red)
+        }
+        .padding()
     }
 }
 
 extension ConqrWidgetAttributes {
     fileprivate static var preview: ConqrWidgetAttributes {
-        ConqrWidgetAttributes(name: "World")
+        ConqrWidgetAttributes(activityType: .run, startDate: .now.addingTimeInterval(-125))
     }
 }
 
 extension ConqrWidgetAttributes.ContentState {
-    fileprivate static var smiley: ConqrWidgetAttributes.ContentState {
-        ConqrWidgetAttributes.ContentState(emoji: "😀")
-     }
-     
-     fileprivate static var starEyes: ConqrWidgetAttributes.ContentState {
-         ConqrWidgetAttributes.ContentState(emoji: "🤩")
-     }
+    fileprivate static var running: ConqrWidgetAttributes.ContentState {
+        ConqrWidgetAttributes.ContentState()
+    }
 }
 
 #Preview("Notification", as: .content, using: ConqrWidgetAttributes.preview) {
    ConqrWidgetLiveActivity()
 } contentStates: {
-    ConqrWidgetAttributes.ContentState.smiley
-    ConqrWidgetAttributes.ContentState.starEyes
+    ConqrWidgetAttributes.ContentState.running
 }
