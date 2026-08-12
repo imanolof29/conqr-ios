@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1"
+     creator="OpenAI"
+     xmlns="http://www.topografix.com/GPX/1/1"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.topografix.com/GPX/1/1
+     http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <metadata>
+    <name>Irun Walking Route</name>
+    <desc>Ruta de prueba para iOS Simulator - Irun, Gipuzkoa</desc>
+  </metadata>
+  <trk>
+    <name>Irun - Ruta a pie</name>
+    <type>walking</type>
+    <trkseg>
+      <!-- Plaza San Juan -->
+      <trkpt lat="43.33984" lon="-1.78952"/>
+      <trkpt lat="43.34008" lon="-1.78918"/>
+      <trkpt lat="43.34042" lon="-1.78874"/>
+      <trkpt lat="43.34076" lon="-1.78830"/>
+      <trkpt lat="43.34110" lon="-1.78786"/>
+      <trkpt lat="43.34144" lon="-1.78742"/>
+      <trkpt lat="43.34178" lon="-1.78698"/>
+      <trkpt lat="43.34212" lon="-1.78654"/>
+      <trkpt lat="43.34246" lon="-1.78610"/>
+      <trkpt lat="43.34280" lon="-1.78566"/>
+      <!-- Paseo Colón -->
+      <trkpt lat="43.34310" lon="-1.78522"/>
+      <trkpt lat="43.34342" lon="-1.78478"/>
+      <trkpt lat="43.34374" lon="-1.78434"/>
+      <trkpt lat="43.34406" lon="-1.78390"/>
+      <trkpt lat="43.34438" lon="-1.78346"/>
+      <trkpt lat="43.34470" lon="-1.78302"/>
+      <trkpt lat="43.34502" lon="-1.78258"/>
+      <trkpt lat="43.34534" lon="-1.78214"/>
+      <trkpt lat="43.34566" lon="-1.78170"/>
+      <trkpt lat="43.34598" lon="-1.78126"/>
+      <!-- Santiago / Bidasoa -->
+      <trkpt lat="43.34630" lon="-1.78082"/>
+      <trkpt lat="43.34658" lon="-1.78036"/>
+      <trkpt lat="43.34684" lon="-1.77988"/>
+      <trkpt lat="43.34708" lon="-1.77938"/>
+      <trkpt lat="43.34730" lon="-1.77886"/>
+      <trkpt lat="43.34750" lon="-1.77832"/>
+      <trkpt lat="43.34768" lon="-1.77776"/>
+      <trkpt lat="43.34784" lon="-1.77718"/>
+      <trkpt lat="43.34798" lon="-1.77658"/>
+      <trkpt lat="43.34810" lon="-1.77596"/>
+      <!-- Giro -->
+      <trkpt lat="43.34818" lon="-1.77534"/>
+      <trkpt lat="43.34812" lon="-1.77472"/>
+      <trkpt lat="43.34796" lon="-1.77418"/>
+      <trkpt lat="43.34770" lon="-1.77372"/>
+      <trkpt lat="43.34738" lon="-1.77336"/>
+      <trkpt lat="43.34702" lon="-1.77308"/>
+      <trkpt lat="43.34662" lon="-1.77290"/>
+      <trkpt lat="43.34620" lon="-1.77282"/>
+      <!-- Vuelta -->
+      <trkpt lat="43.34578" lon="-1.77288"/>
+      <trkpt lat="43.34538" lon="-1.77308"/>
+      <trkpt lat="43.34502" lon="-1.77338"/>
+      <trkpt lat="43.34472" lon="-1.77378"/>
+      <trkpt lat="43.34450" lon="-1.77428"/>
+      <trkpt lat="43.34434" lon="-1.77484"/>
+      <trkpt lat="43.34426" lon="-1.77544"/>
+      <trkpt lat="43.34424" lon="-1.77606"/>
+      <trkpt lat="43.34428" lon="-1.77668"/>
+      <trkpt lat="43.34438" lon="-1.77728"/>
+      <trkpt lat="43.34454" lon="-1.77784"/>
+      <trkpt lat="43.34476" lon="-1.77836"/>
+      <trkpt lat="43.34504" lon="-1.77882"/>
+      <trkpt lat="43.34538" lon="-1.77920"/>
+      <trkpt lat="43.34576" lon="-1.77948"/>
+      <trkpt lat="43.34618" lon="-1.77966"/>
+      <trkpt lat="43.34660" lon="-1.77972"/>
+      <!-- Regreso a centro -->
+      <trkpt lat="43.34630" lon="-1.78018"/>
+      <trkpt lat="43.34598" lon="-1.78064"/>
+      <trkpt lat="43.34566" lon="-1.78110"/>
+      <trkpt lat="43.34534" lon="-1.78156"/>
+      <trkpt lat="43.34502" lon="-1.78202"/>
+      <trkpt lat="43.34470" lon="-1.78248"/>
+      <trkpt lat="43.34438" lon="-1.78294"/>
+      <trkpt lat="43.34406" lon="-1.78340"/>
+      <trkpt lat="43.34374" lon="-1.78386"/>
+      <trkpt lat="43.34342" lon="-1.78432"/>
+      <trkpt lat="43.34310" lon="-1.78478"/>
+      <trkpt lat="43.34278" lon="-1.78524"/>
+      <trkpt lat="43.34246" lon="-1.78570"/>
+      <trkpt lat="43.34214" lon="-1.78616"/>
+      <trkpt lat="43.34182" lon="-1.78662"/>
+      <trkpt lat="43.34150" lon="-1.78708"/>
+      <trkpt lat="43.34118" lon="-1.78754"/>
+      <trkpt lat="43.34086" lon="-1.78800"/>
+      <trkpt lat="43.34054" lon="-1.78846"/>
+      <trkpt lat="43.34022" lon="-1.78892"/>
+      <trkpt lat="43.33984" lon="-1.78952"/>
+    </trkseg>
+  </trk>
+</gpx>
