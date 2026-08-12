@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 protocol NetworkClientProtocol {
     @discardableResult
     func send<E: Endpoint, Response: Decodable>(_ endpoint: E) async throws -> Response
@@ -25,23 +24,17 @@ final class NetworkClient: NetworkClientProtocol {
     private let session: URLSession
     private let tokenStore: AuthTokenStoring
     private let decoder: JSONDecoder
-    private let encoder: JSONEncoder
-    private let onUnauthorized: (() -> Void)?
 
     init(
         baseURL: URL,
         session: URLSession = .shared,
         tokenStore: AuthTokenStoring,
-        decoder: JSONDecoder = .conqrDefault,
-        encoder: JSONEncoder = .conqrDefault,
-        onUnauthorized: (() -> Void)? = nil
+        decoder: JSONDecoder = .conqrDefault
     ) {
         self.baseURL = baseURL
         self.session = session
         self.tokenStore = tokenStore
         self.decoder = decoder
-        self.encoder = encoder
-        self.onUnauthorized = onUnauthorized
     }
 
     @discardableResult
@@ -91,7 +84,7 @@ final class NetworkClient: NetworkClientProtocol {
 
         if let body = endpoint.body {
             do {
-                request.httpBody = try encoder.encode(body)
+                request.httpBody = try JSONSerialization.data(withJSONObject: body)
             } catch {
                 throw NetworkError.encodingFailed(String(describing: error))
             }
@@ -119,7 +112,6 @@ final class NetworkClient: NetworkClientProtocol {
         case 200..<300:
             return
         case 401:
-            onUnauthorized?()
             throw NetworkError.unauthorized
         default:
             let message = friendlyMessage(from: data) ?? String(data: data, encoding: .utf8)
@@ -127,8 +119,6 @@ final class NetworkClient: NetworkClientProtocol {
         }
     }
 
-    /// Nest's default error body is `{"message": "..." | ["...", ...], "error": "...", "statusCode": ...}`.
-    /// Pull `message` out of it so the UI shows "Email already in use" instead of raw JSON.
     private func friendlyMessage(from data: Data) -> String? {
         guard let payload = try? decoder.decode(APIErrorPayload.self, from: data) else { return nil }
         return payload.message
@@ -156,17 +146,7 @@ private struct APIErrorPayload: Decodable {
 extension JSONDecoder {
     static let conqrDefault: JSONDecoder = {
         let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
         decoder.dateDecodingStrategy = .iso8601
         return decoder
-    }()
-}
-
-extension JSONEncoder {
-    static let conqrDefault: JSONEncoder = {
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
-        encoder.dateEncodingStrategy = .iso8601
-        return encoder
     }()
 }

@@ -20,19 +20,17 @@ final class AuthService: ObservableObject {
     }
 
     func signUp(email: String, password: String) async throws {
-        let response: AuthResponseDTO = try await client.send(SignUpEndpoint(email: email, password: password))
+        let response: AuthResponseDTO = try await client.send(AuthEndpoint.signUp(email: email, password: password))
         persistSession(response)
     }
 
     func signIn(email: String, password: String) async throws {
-        let response: AuthResponseDTO = try await client.send(SignInEndpoint(email: email, password: password))
+        let response: AuthResponseDTO = try await client.send(AuthEndpoint.signIn(email: email, password: password))
         persistSession(response)
     }
 
-    /// Best-effort server-side sign-out (invalidates the refresh token). Local
-    /// session is cleared regardless of whether the request succeeds.
     func signOut() async {
-        try? await client.send(SignOutEndpoint())
+        try? await client.send(AuthEndpoint.signOut)
         tokenStore.clear()
         UserDefaults.standard.set(false, forKey: AppSettingsKeys.loggedIn)
     }
@@ -44,9 +42,6 @@ final class AuthService: ObservableObject {
 }
 
 extension AuthService {
-    /// Production instance, wired to `APIEnvironment.baseURL` and the Keychain.
-    /// Access tokens refresh transparently on 401 via `SessionRefreshingNetworkClient`;
-    /// the session only actually ends when the refresh token itself is rejected.
     static func live() -> AuthService {
         let tokenStore = KeychainTokenStore()
         let rawClient = NetworkClient(baseURL: APIEnvironment.baseURL, tokenStore: tokenStore)

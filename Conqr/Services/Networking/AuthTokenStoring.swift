@@ -8,8 +8,6 @@
 import Foundation
 import Security
 
-/// Persists the credential `NetworkClient` attaches to authenticated requests.
-/// Abstracted so the client stays testable (inject an in-memory fake in tests).
 protocol AuthTokenStoring: AnyObject {
     var accessToken: String? { get }
     var refreshToken: String? { get }
@@ -17,7 +15,6 @@ protocol AuthTokenStoring: AnyObject {
     func clear()
 }
 
-/// Keychain-backed implementation. Tokens never touch UserDefaults.
 final class KeychainTokenStore: AuthTokenStoring {
     private let service: String
 

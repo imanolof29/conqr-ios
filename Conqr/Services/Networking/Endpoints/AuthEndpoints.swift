@@ -7,69 +7,43 @@
 
 import Foundation
 
-/// Matches `AuthResponseDto` on the backend (`accessToken` + `refreshToken`).
 struct AuthResponseDTO: Decodable {
     let accessToken: String
     let refreshToken: String
 }
 
-/// POST /auth/sign-up — matches `SignUpDto` (email, password ≥ 8 chars).
-struct SignUpEndpoint: Endpoint {
-    struct Body: Encodable {
-        let email: String
-        let password: String
+enum AuthEndpoint: Endpoint {
+    case signUp(email: String, password: String)
+    case signIn(email: String, password: String)
+    case refresh(refreshToken: String)
+    case signOut
+
+    var path: String {
+        switch self {
+        case .signUp: return "auth/sign-up"
+        case .signIn: return "auth/sign-in"
+        case .refresh: return "auth/refresh"
+        case .signOut: return "auth/sign-out"
+        }
     }
 
-    let body: Body?
-
-    var path: String { "auth/sign-up" }
     var method: HTTPMethod { .post }
-    var requiresAuth: Bool { false }
 
-    init(email: String, password: String) {
-        body = Body(email: email, password: password)
-    }
-}
-
-/// POST /auth/sign-in — matches `SignInDto`.
-struct SignInEndpoint: Endpoint {
-    struct Body: Encodable {
-        let email: String
-        let password: String
+    var requiresAuth: Bool {
+        switch self {
+        case .signOut: return true
+        case .signUp, .signIn, .refresh: return false
+        }
     }
 
-    let body: Body?
-
-    var path: String { "auth/sign-in" }
-    var method: HTTPMethod { .post }
-    var requiresAuth: Bool { false }
-
-    init(email: String, password: String) {
-        body = Body(email: email, password: password)
+    var body: [String: Any]? {
+        switch self {
+        case .signUp(let email, let password), .signIn(let email, let password):
+            return ["email": email, "password": password]
+        case .refresh(let refreshToken):
+            return ["refreshToken": refreshToken]
+        case .signOut:
+            return nil
+        }
     }
-}
-
-/// POST /auth/refresh — matches `RefreshTokenDto`. Trades a refresh token
-/// for a fresh access/refresh pair; no `Authorization` header involved.
-struct RefreshTokenEndpoint: Endpoint {
-    struct Body: Encodable {
-        let refreshToken: String
-    }
-
-    let body: Body?
-
-    var path: String { "auth/refresh" }
-    var method: HTTPMethod { .post }
-    var requiresAuth: Bool { false }
-
-    init(refreshToken: String) {
-        body = Body(refreshToken: refreshToken)
-    }
-}
-
-/// POST /auth/sign-out — matches the `JwtAuthGuard`-protected endpoint;
-/// invalidates the refresh token server-side.
-struct SignOutEndpoint: Endpoint {
-    var path: String { "auth/sign-out" }
-    var method: HTTPMethod { .post }
 }
