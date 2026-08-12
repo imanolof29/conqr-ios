@@ -5,7 +5,7 @@
 //  Created by Imanol Ortiz on 12/08/2026.
 //
 
-import Foundation
+import SwiftUI
 
 enum ActivityType: String, CaseIterable, Identifiable, Codable, Equatable {
     case walk
@@ -33,6 +33,17 @@ enum ActivityType: String, CaseIterable, Identifiable, Codable, Equatable {
             "figure.run"
         case .cycle:
             "bicycle"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .walk:
+            .green
+        case .run:
+            .orange
+        case .cycle:
+            .blue
         }
     }
 }

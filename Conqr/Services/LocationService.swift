@@ -21,6 +21,10 @@ final class LocationService: NSObject {
 
     var isTrackingUser: Bool = true
 
+    private(set) var isWorkoutTracking: Bool = false
+    
+    var onWorkoutLocationUpdate: ((CLLocation) -> Void)?
+
     private let manager: CLLocationManager
 
     enum LocationError: Error, LocalizedError {
@@ -47,8 +51,23 @@ final class LocationService: NSObject {
         super.init()
 
         manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyBest
-        manager.distanceFilter = 10
+        configureForPassiveUpdates()
+    }
+
+    private func configureForPassiveUpdates() {
+        manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        manager.distanceFilter = 25
+        manager.pausesLocationUpdatesAutomatically = true
+        manager.allowsBackgroundLocationUpdates = false
+    }
+
+
+    private func configureForWorkoutTracking() {
+        manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        manager.distanceFilter = 5
+        manager.activityType = .fitness
+        manager.pausesLocationUpdatesAutomatically = false
+        manager.allowsBackgroundLocationUpdates = authorizationStatus == .authorizedAlways
     }
 
     func requestPermission() {
@@ -66,13 +85,41 @@ final class LocationService: NSObject {
         }
     }
 
+
+    func requestAlwaysPermission() {
+        guard authorizationStatus == .authorizedWhenInUse else { return }
+        manager.requestAlwaysAuthorization()
+    }
+
     func startUpdating() {
         guard isAuthorized else { return }
+        if !isWorkoutTracking {
+            configureForPassiveUpdates()
+        }
         manager.startUpdatingLocation()
     }
 
     func stopUpdating() {
         manager.stopUpdatingLocation()
+    }
+
+    
+    func startWorkoutTracking() {
+        guard isAuthorized else {
+            requestPermission()
+            return
+        }
+        isWorkoutTracking = true
+        requestAlwaysPermission()
+        configureForWorkoutTracking()
+        manager.startUpdatingLocation()
+    }
+
+
+    func stopWorkoutTracking() {
+        isWorkoutTracking = false
+        configureForPassiveUpdates()
+        manager.startUpdatingLocation()
     }
 
     func requestOneShotLocation() {
@@ -104,6 +151,9 @@ extension LocationService: CLLocationManagerDelegate {
         switch authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
             lastError = nil
+            if isWorkoutTracking {
+                configureForWorkoutTracking()
+            }
             startUpdating()
         case .denied:
             lastError = .permissionDenied
@@ -124,6 +174,10 @@ extension LocationService: CLLocationManagerDelegate {
             cameraPosition = .camera(
                 MapCamera(centerCoordinate: latest.coordinate, distance: 800)
             )
+        }
+
+        if isWorkoutTracking {
+            onWorkoutLocationUpdate?(latest)
         }
     }
 
