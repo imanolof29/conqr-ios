@@ -70,18 +70,11 @@ class ActivityRecord {
     }
 
     var formattedDistance: String {
-        let measurement = Measurement(value: distance, unit: UnitLength.meters)
-        return measurement.formatted(
-            .measurement(width: .abbreviated, usage: .road, numberFormatStyle: .number.precision(.fractionLength(0...2)))
-        )
+        distance.formattedAsDistance
     }
 
     var formattedDuration: String {
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = duration >= 3600 ? [.hour, .minute, .second] : [.minute, .second]
-        formatter.unitsStyle = .positional
-        formatter.zeroFormattingBehavior = .pad
-        return formatter.string(from: duration) ?? "0:00"
+        duration.formattedAsDuration
     }
 
     @discardableResult

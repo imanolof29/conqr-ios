@@ -47,6 +47,18 @@ struct ConqrMapView: View {
             } message: { error in
                 Text(error.errorDescription ?? "Unknown error")
             }
+            .alert(
+                "Tracking",
+                isPresented: Binding(
+                    get: { workoutTracker?.connectionError != nil },
+                    set: { if !$0 { } }
+                ),
+                presenting: workoutTracker?.connectionError
+            ) { _ in
+                Button("OK") {}
+            } message: { message in
+                Text(message)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     if workoutTracker?.isActive == true {
