@@ -6,14 +6,65 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8485C158302CD6A500B297E7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8485C157302CD6A500B297E7 /* WidgetKit.framework */; };
+		8485C15A302CD6A500B297E7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8485C159302CD6A500B297E7 /* SwiftUI.framework */; };
+		8485C167302CD6A700B297E7 /* ConqrWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8485C155302CD6A500B297E7 /* ConqrWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8485C165302CD6A700B297E7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8485C03C302CC0AE00B297E7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8485C154302CD6A500B297E7;
+			remoteInfo = ConqrWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8485C16C302CD6A700B297E7 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				8485C167302CD6A700B297E7 /* ConqrWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		8485C044302CC0AE00B297E7 /* Conqr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Conqr.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8485C155302CD6A500B297E7 /* ConqrWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ConqrWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		8485C157302CD6A500B297E7 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		8485C159302CD6A500B297E7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		8485C168302CD6A700B297E7 /* Exceptions for "ConqrWidget" folder in "ConqrWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 8485C154302CD6A500B297E7 /* ConqrWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8485C046302CC0AE00B297E7 /* Conqr */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Conqr;
+			sourceTree = "<group>";
+		};
+		8485C15B302CD6A500B297E7 /* ConqrWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8485C168302CD6A700B297E7 /* Exceptions for "ConqrWidget" folder in "ConqrWidgetExtension" target */,
+			);
+			path = ConqrWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -26,6 +77,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8485C152302CD6A500B297E7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8485C15A302CD6A500B297E7 /* SwiftUI.framework in Frameworks */,
+				8485C158302CD6A500B297E7 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -33,6 +93,8 @@
 			isa = PBXGroup;
 			children = (
 				8485C046302CC0AE00B297E7 /* Conqr */,
+				8485C15B302CD6A500B297E7 /* ConqrWidget */,
+				8485C156302CD6A500B297E7 /* Frameworks */,
 				8485C045302CC0AE00B297E7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,8 +103,18 @@
 			isa = PBXGroup;
 			children = (
 				8485C044302CC0AE00B297E7 /* Conqr.app */,
+				8485C155302CD6A500B297E7 /* ConqrWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		8485C156302CD6A500B297E7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8485C157302CD6A500B297E7 /* WidgetKit.framework */,
+				8485C159302CD6A500B297E7 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -55,10 +127,12 @@
 				8485C040302CC0AE00B297E7 /* Sources */,
 				8485C041302CC0AE00B297E7 /* Frameworks */,
 				8485C042302CC0AE00B297E7 /* Resources */,
+				8485C16C302CD6A700B297E7 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				8485C166302CD6A700B297E7 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				8485C046302CC0AE00B297E7 /* Conqr */,
@@ -69,6 +143,28 @@
 			productName = Conqr;
 			productReference = 8485C044302CC0AE00B297E7 /* Conqr.app */;
 			productType = "com.apple.product-type.application";
+		};
+		8485C154302CD6A500B297E7 /* ConqrWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8485C169302CD6A700B297E7 /* Build configuration list for PBXNativeTarget "ConqrWidgetExtension" */;
+			buildPhases = (
+				8485C151302CD6A500B297E7 /* Sources */,
+				8485C152302CD6A500B297E7 /* Frameworks */,
+				8485C153302CD6A500B297E7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				8485C15B302CD6A500B297E7 /* ConqrWidget */,
+			);
+			name = ConqrWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = ConqrWidgetExtension;
+			productReference = 8485C155302CD6A500B297E7 /* ConqrWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -81,6 +177,9 @@
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					8485C043302CC0AE00B297E7 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					8485C154302CD6A500B297E7 = {
 						CreatedOnToolsVersion = 26.2;
 					};
 				};
@@ -100,12 +199,20 @@
 			projectRoot = "";
 			targets = (
 				8485C043302CC0AE00B297E7 /* Conqr */,
+				8485C154302CD6A500B297E7 /* ConqrWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		8485C042302CC0AE00B297E7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8485C153302CD6A500B297E7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +229,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8485C151302CD6A500B297E7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8485C166302CD6A700B297E7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8485C154302CD6A500B297E7 /* ConqrWidgetExtension */;
+			targetProxy = 8485C165302CD6A700B297E7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		8485C04D302CC0AF00B297E7 /* Debug */ = {
@@ -318,6 +440,66 @@
 			};
 			name = Release;
 		};
+		8485C16A302CD6A700B297E7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 82YX37LRS4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ConqrWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ConqrWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.imanolortiz.Conqr.ConqrWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8485C16B302CD6A700B297E7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 82YX37LRS4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ConqrWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ConqrWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.imanolortiz.Conqr.ConqrWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -335,6 +517,15 @@
 			buildConfigurations = (
 				8485C050302CC0AF00B297E7 /* Debug */,
 				8485C051302CC0AF00B297E7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8485C169302CD6A700B297E7 /* Build configuration list for PBXNativeTarget "ConqrWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8485C16A302CD6A700B297E7 /* Debug */,
+				8485C16B302CD6A700B297E7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
