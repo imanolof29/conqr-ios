@@ -11,15 +11,19 @@ struct PrimaryButton: View {
     let title: String
     var icon: String? = nil
     var shape: AnyShape = AnyShape(Capsule())
+    var fullWidth: Bool = false
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            if let icon {
-                Label(title, systemImage: icon)
-            } else {
-                Text(title)
+            Group {
+                if let icon {
+                    Label(title, systemImage: icon)
+                } else {
+                    Text(title)
+                }
             }
+            .frame(maxWidth: fullWidth ? .infinity : nil)
         }
         .buttonStyle(.primary(shape: shape))
     }
@@ -34,6 +38,8 @@ struct PrimaryButton: View {
             icon: "plus",
             shape: AnyShape(RoundedRectangle(cornerRadius: 14))
         ) {}
+
+        PrimaryButton(title: "Iniciar", fullWidth: true) {}
     }
     .padding()
     .background(.gray.opacity(0.2))

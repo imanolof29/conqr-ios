@@ -46,30 +46,13 @@ struct ConqrMapView: View {
                 }
             }
             .sheet(isPresented: $showActivitySheet) {
-                ActivitySelector()
-                    .presentationDetents([.medium])
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func ActivitySelector() -> some View {
-        VStack {
-            HStack {
-                ForEach(ActivityType.allCases, id: \.self) { activity in
-                    VStack {
-                        Text(activity.description)
-                    }
+                ActivitySelectorSheet { _ in
+                    showActivitySheet = false
                 }
-            }
-            Button {
-                showActivitySheet = false
-            }label: {
-                Text("Iniciar")
+                .presentationDetents([.medium])
             }
         }
     }
-    
 }
 
 #Preview {

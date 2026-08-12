@@ -7,12 +7,14 @@
 
 import Foundation
 
-enum ActivityType: CaseIterable {
+enum ActivityType: CaseIterable, Identifiable, Equatable {
     case walk
     case run
     case cycle
-    
-    var description: String {
+
+    var id: Self { self }
+
+    var title: String {
         switch self {
         case .walk:
             "Andar"
@@ -22,16 +24,15 @@ enum ActivityType: CaseIterable {
             "Bici"
         }
     }
-    
+
     var icon: String {
         switch self {
         case .walk:
-            "walk"
+            "figure.walk"
         case .run:
-            "run"
+            "figure.run"
         case .cycle:
-            "bike"
+            "bicycle"
         }
     }
-    
 }
