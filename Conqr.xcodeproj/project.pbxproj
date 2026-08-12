@@ -79,8 +79,8 @@
 		8485C15B302CD6A500B297E7 /* ConqrWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				8485C168302CD6A700B297E7 /* Exceptions for "ConqrWidget" folder in "ConqrWidgetExtension" target */,
 				8485C170302CD6A700B297E7 /* Exceptions for "ConqrWidget" folder in "Conqr" target */,
+				8485C168302CD6A700B297E7 /* Exceptions for "ConqrWidget" folder in "ConqrWidgetExtension" target */,
 			);
 			path = ConqrWidget;
 			sourceTree = "<group>";
