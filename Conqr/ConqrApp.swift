@@ -11,7 +11,20 @@ import SwiftUI
 struct ConqrApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TabView {
+                ConqrMapView()
+                    .tabItem {
+                        Label("Map", systemImage: "map")
+                    }
+                WorkoutListView()
+                    .tabItem {
+                        Label("Workouts", systemImage: "list.bullet")
+                    }
+                ProfileView()
+                    .tabItem {
+                        Label("Profile", systemImage: "person")
+                    }
+            }
         }
     }
 }
