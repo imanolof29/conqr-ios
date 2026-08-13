@@ -16,31 +16,42 @@ final class WorkoutTracker {
 
     private(set) var activeActivity: ActivityRecord?
     private(set) var connectionError: String?
+    private(set) var lastConquest: TerritoryConqueredPayload?
 
     var isActive: Bool { activeActivity != nil }
 
     private let locationService: LocationService
     private let modelContext: ModelContext
     private let trackingSocket: TrackingSocketServicing
+    private let remoteTrackingService: RemoteTrackingServicing
     private var liveActivity: Activity<ConqrWidgetAttributes>?
 
     private var remoteWorkoutId: String?
+    private var pointSequence: Int = 0
 
     init(
         locationService: LocationService,
         modelContext: ModelContext,
-        trackingSocket: TrackingSocketServicing = TrackingSocketService()
+        trackingSocket: TrackingSocketServicing = TrackingSocketService(),
+        remoteTrackingService: RemoteTrackingServicing = RemoteTrackingService(
+            client: APIClient(baseURL: APIEnvironment.baseURL, tokenProvider: { KeychainTokenStore().accessToken })
+        )
     ) {
         self.locationService = locationService
         self.modelContext = modelContext
         self.trackingSocket = trackingSocket
+        self.remoteTrackingService = remoteTrackingService
 
         locationService.onWorkoutLocationUpdate = { [weak self] location in
             self?.record(location)
         }
 
-        trackingSocket.onPointAck = { [weak self] distanceMeters in
-            self?.activeActivity?.distance = distanceMeters
+        trackingSocket.onTerritoryConquered = { [weak self] conquest in
+            self?.lastConquest = conquest
+        }
+
+        trackingSocket.onServerError = { [weak self] message in
+            self?.connectionError = message
         }
     }
 
@@ -51,6 +62,7 @@ final class WorkoutTracker {
         modelContext.insert(activity)
         activeActivity = activity
         remoteWorkoutId = nil
+        pointSequence = 0
         connectionError = nil
 
         locationService.startWorkoutTracking()
@@ -70,13 +82,14 @@ final class WorkoutTracker {
 
         let remoteWorkoutId = self.remoteWorkoutId
         self.remoteWorkoutId = nil
-        guard let remoteWorkoutId else { return }
 
-        Task { [trackingSocket, modelContext] in
+        Task { [trackingSocket, remoteTrackingService, modelContext] in
+            defer { trackingSocket.disconnect() }
+
+            guard let remoteWorkoutId else { return }
             do {
-                let payload = try await trackingSocket.finishWorkout(workoutId: remoteWorkoutId)
-                activity.distance = payload.distanceMeters
-                activity.markSynced(remoteID: payload.workoutId)
+                let payload = try await remoteTrackingService.finishWorkout(id: remoteWorkoutId)
+                activity.markSynced(remoteID: payload.id)
                 try? modelContext.save()
             } catch {
 
@@ -89,22 +102,27 @@ final class WorkoutTracker {
         activeActivity.addLocation(location)
 
         if let remoteWorkoutId {
-            trackingSocket.sendPoint(
+            pointSequence += 1
+            trackingSocket.sendLocation(
                 workoutId: remoteWorkoutId,
+                sequence: pointSequence,
+                timestamp: location.timestamp,
                 lat: location.coordinate.latitude,
-                lng: location.coordinate.longitude
+                lng: location.coordinate.longitude,
+                accuracy: location.horizontalAccuracy >= 0 ? location.horizontalAccuracy : nil
             )
         }
     }
 
     private func connectRemote(for activity: ActivityRecord) {
-        Task { [weak self, trackingSocket] in
+        Task { [weak self, trackingSocket, remoteTrackingService] in
             guard let self else { return }
             do {
-                let workoutId = try await trackingSocket.startWorkout()
+                try await trackingSocket.connect()
+                let workout = try await remoteTrackingService.startWorkout(activityType: activity.activityType)
                 guard self.activeActivity === activity else { return } // finished/cancelled meanwhile
-                self.remoteWorkoutId = workoutId
-                activity.remoteID = workoutId
+                self.remoteWorkoutId = workout.id
+                activity.remoteID = workout.id
             } catch {
                 guard self.activeActivity === activity else { return }
                 self.connectionError = (error as? TrackingSocketError)?.errorDescription ?? error.localizedDescription

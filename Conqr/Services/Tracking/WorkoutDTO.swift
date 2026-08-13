@@ -5,42 +5,28 @@
 //  Created by Imanol Ortiz on 12/08/2026.
 //
 
-import SwiftUI
+import Foundation
 
+/// Mirrors backend WorkoutResponseDto (nest/conqr). No distance/polyline here —
+/// the server no longer computes or stores those; local ActivityRecord is the
+/// source of truth for route + distance display.
 struct WorkoutDTO: Decodable, Identifiable, Equatable {
     let id: String
     let status: RemoteWorkoutStatus
-    let distanceMeters: Double
-    let polyline: String?
+    let activityType: RemoteActivityType
     let startedAt: Date
-    let endedAt: Date?
+    let finishedAt: Date?
+    let lastSequence: Int
+    let lastH3: String?
 }
 
 enum RemoteWorkoutStatus: String, Decodable, Equatable {
-    case active
-    case finished
-
-    var title: String {
-        switch self {
-        case .active: "En curso"
-        case .finished: "Completado"
-        }
-    }
-
-    var color: Color {
-        switch self {
-        case .active: .blue
-        case .finished: .green
-        }
-    }
+    case active = "ACTIVE"
+    case finished = "FINISHED"
 }
 
-extension WorkoutDTO {
-    var formattedDistance: String {
-        distanceMeters.formattedAsDistance
-    }
-
-    var formattedDuration: String {
-        (endedAt ?? Date()).timeIntervalSince(startedAt).formattedAsDuration
-    }
+enum RemoteActivityType: String, Decodable, Equatable {
+    case running = "RUNNING"
+    case walking = "WALKING"
+    case cycling = "CYCLING"
 }

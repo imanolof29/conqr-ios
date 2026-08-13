@@ -8,19 +8,19 @@
 import SwiftUI
 
 struct WorkoutRow: View {
-    let workout: WorkoutDTO
+    let workout: ActivityRecord
 
     private var dateText: String {
-        workout.startedAt.formatted(date: .abbreviated, time: .shortened)
+        workout.startDate.formatted(date: .abbreviated, time: .shortened)
     }
 
     var body: some View {
         HStack(spacing: 14) {
-            Image(systemName: "figure.mixed.cardio")
+            Image(systemName: workout.activityType.icon)
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(width: 46, height: 46)
-                .glassEffect(.regular.tint(.blue), in: .circle)
+                .glassEffect(.regular.tint(workout.activityType.color), in: .circle)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(dateText)
@@ -49,21 +49,14 @@ struct WorkoutRow: View {
 }
 
 #Preview {
-    let active = WorkoutDTO(
-        id: UUID().uuidString,
-        status: .active,
-        distanceMeters: 1240,
-        polyline: nil,
-        startedAt: .now.addingTimeInterval(-1800),
-        endedAt: nil
-    )
-    let finished = WorkoutDTO(
-        id: UUID().uuidString,
-        status: .finished,
-        distanceMeters: 5200,
-        polyline: nil,
-        startedAt: .now.addingTimeInterval(-3600),
-        endedAt: .now.addingTimeInterval(-1800)
+    let active = ActivityRecord(type: .run, status: .inProgress)
+    let finished = ActivityRecord(
+        type: .walk,
+        startDate: .now.addingTimeInterval(-3600),
+        endDate: .now.addingTimeInterval(-1800),
+        duration: 1800,
+        distance: 5200,
+        status: .completed
     )
 
     return ScrollView {

@@ -25,17 +25,22 @@ enum TrackingSocketError: Error, LocalizedError, Equatable {
     }
 }
 
-struct FinishedWorkoutPayload: Equatable {
-    let workoutId: String
-    let distanceMeters: Double
-    let polyline: String?
+/// Mirrors the `territory:conquered` payload emitted by TrackingGateway
+/// when a location update crosses into a new, previously-unowned H3 cell.
+struct TerritoryConqueredPayload: Equatable {
+    let h3Index: String
+    let previousOwnerId: String?
+    let newOwnerId: String
 }
 
+/// Only handles the live GPS stream — starting/finishing a workout is done
+/// over REST (see RemoteTrackingService); this socket exists purely for
+/// pushing `location:update` events and receiving conquest notifications.
 protocol TrackingSocketServicing: AnyObject {
-    var onPointAck: ((Double) -> Void)? { get set }
-    func startWorkout() async throws -> String
-    func sendPoint(workoutId: String, lat: Double, lng: Double)
-    func finishWorkout(workoutId: String) async throws -> FinishedWorkoutPayload
+    var onTerritoryConquered: ((TerritoryConqueredPayload) -> Void)? { get set }
+    var onServerError: ((String) -> Void)? { get set }
+    func connect() async throws
+    func sendLocation(workoutId: String, sequence: Int, timestamp: Date, lat: Double, lng: Double, accuracy: Double?)
     func disconnect()
 }
 
@@ -43,16 +48,17 @@ protocol TrackingSocketServicing: AnyObject {
 final class TrackingSocketService: TrackingSocketServicing {
     private let manager: SocketManager
     private let socket: SocketIOClient
-    private let ackTimeout: Double
+    private let connectTimeout: Double
 
-    var onPointAck: ((Double) -> Void)?
+    var onTerritoryConquered: ((TerritoryConqueredPayload) -> Void)?
+    var onServerError: ((String) -> Void)?
 
     init(
         baseURL: URL = APIEnvironment.baseURL,
         tokenStore: AuthTokenStoring = KeychainTokenStore(),
-        ackTimeout: Double = 10
+        connectTimeout: Double = 10
     ) {
-        self.ackTimeout = ackTimeout
+        self.connectTimeout = connectTimeout
 
         var config: SocketIOClientConfiguration = [.log(false), .compress, .forceWebsockets(true)]
         if let token = tokenStore.accessToken {
@@ -62,61 +68,30 @@ final class TrackingSocketService: TrackingSocketServicing {
         manager = SocketManager(socketURL: baseURL, config: config)
         socket = manager.socket(forNamespace: "/tracking")
 
-        socket.on("workout:point:ack") { [weak self] data, _ in
+        socket.on("territory:conquered") { [weak self] data, _ in
             guard let dict = data.first as? [String: Any],
-                  let distanceMeters = dict["distanceMeters"] as? Double else { return }
+                  let h3Index = dict["h3Index"] as? String,
+                  let newOwnerId = dict["newOwnerId"] as? String else { return }
+            let payload = TerritoryConqueredPayload(
+                h3Index: h3Index,
+                previousOwnerId: dict["previousOwnerId"] as? String,
+                newOwnerId: newOwnerId
+            )
             Task { @MainActor [weak self] in
-                self?.onPointAck?(distanceMeters)
+                self?.onTerritoryConquered?(payload)
+            }
+        }
+
+        socket.on("error") { [weak self] data, _ in
+            guard let dict = data.first as? [String: Any],
+                  let message = dict["message"] as? String else { return }
+            Task { @MainActor [weak self] in
+                self?.onServerError?(message)
             }
         }
     }
 
-    func startWorkout() async throws -> String {
-        try await connect()
-
-        let result: Result<String, TrackingSocketError> = await withTimeout { [socket] resume in
-            socket.once("workout:started") { data, _ in
-                guard let dict = data.first as? [String: Any],
-                      let workoutId = dict["workoutId"] as? String else { return }
-                Task { @MainActor in resume(workoutId) }
-            }
-            socket.emit("workout:start")
-        }
-        return try result.get()
-    }
-
-    func sendPoint(workoutId: String, lat: Double, lng: Double) {
-        guard socket.status == .connected else { return }
-        socket.emit("workout:point", ["workoutId": workoutId, "lat": lat, "lng": lng])
-    }
-
-    func finishWorkout(workoutId: String) async throws -> FinishedWorkoutPayload {
-        try await connect()
-
-        let result: Result<FinishedWorkoutPayload, TrackingSocketError> = await withTimeout { [socket] resume in
-            socket.once("workout:finished") { data, _ in
-                guard let dict = data.first as? [String: Any],
-                      let id = dict["workoutId"] as? String,
-                      let distanceMeters = dict["distanceMeters"] as? Double else { return }
-                let payload = FinishedWorkoutPayload(
-                    workoutId: id,
-                    distanceMeters: distanceMeters,
-                    polyline: dict["polyline"] as? String
-                )
-                Task { @MainActor in resume(payload) }
-            }
-            socket.emit("workout:finish", ["workoutId": workoutId])
-        }
-        return try result.get()
-    }
-
-    func disconnect() {
-        socket.disconnect()
-    }
-
-    // MARK: - Connection
-
-    private func connect() async throws {
+    func connect() async throws {
         guard socket.status != .connected else { return }
 
         let result: Result<Void, TrackingSocketError> = await withTimeout { [socket] resume in
@@ -127,6 +102,35 @@ final class TrackingSocketService: TrackingSocketServicing {
             throw TrackingSocketError.connectionFailed
         }
     }
+
+    func sendLocation(workoutId: String, sequence: Int, timestamp: Date, lat: Double, lng: Double, accuracy: Double?) {
+        guard socket.status == .connected else { return }
+        var payload: [String: Any] = [
+            "workoutId": workoutId,
+            "sequence": sequence,
+            "timestamp": Self.timestampFormatter.string(from: timestamp),
+            "latitude": lat,
+            "longitude": lng
+        ]
+        if let accuracy {
+            payload["accuracy"] = accuracy
+        }
+        socket.emit("location:update", payload)
+    }
+
+    func disconnect() {
+        socket.disconnect()
+    }
+
+    // Server validates with @IsISO8601() and checks the value falls within a
+    // clock-drift tolerance window, so fractional seconds/UTC are required.
+    private static let timestampFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    // MARK: - Connection
 
     private func withTimeout<T>(
         _ operation: (@escaping (T) -> Void) -> Void
@@ -139,7 +143,7 @@ final class TrackingSocketService: TrackingSocketServicing {
                 didFinish = true
                 continuation.resume(returning: .failure(.timedOut))
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + ackTimeout, execute: timeoutWorkItem)
+            DispatchQueue.main.asyncAfter(deadline: .now() + connectTimeout, execute: timeoutWorkItem)
 
             operation { value in
                 guard !didFinish else { return }

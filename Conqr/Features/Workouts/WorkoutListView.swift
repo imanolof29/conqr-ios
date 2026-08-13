@@ -6,22 +6,19 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct WorkoutListView: View {
 
-    @Environment(AuthManager.self) private var authManager
-
-    @State private var workouts: [WorkoutDTO] = []
-    @State private var isLoading = false
-    @State private var errorMessage: String?
+    // Backend has no "list workouts" endpoint — local SwiftData is the
+    // source of truth for history; ActivityRecord.synced/remoteID tracks
+    // whether each one made it to the server.
+    @Query(sort: \ActivityRecord.startDate, order: .reverse) private var workouts: [ActivityRecord]
 
     var body: some View {
         NavigationStack {
             Group {
-                if isLoading && workouts.isEmpty {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if workouts.isEmpty {
+                if workouts.isEmpty {
                     ContentUnavailableView(
                         "Sin entrenamientos",
                         systemImage: "figure.run.circle",
@@ -32,7 +29,7 @@ struct WorkoutListView: View {
                         VStack(spacing: 12) {
                             ForEach(workouts) { workout in
                                 NavigationLink {
-                                    WorkoutDetailView(workoutId: workout.id)
+                                    WorkoutDetailView(workout: workout)
                                 } label: {
                                     WorkoutRow(workout: workout)
                                 }
@@ -41,36 +38,10 @@ struct WorkoutListView: View {
                         }
                         .padding(16)
                     }
-                    .refreshable { await load() }
                 }
             }
             .navigationTitle("Entrenamientos")
-            .task { await load() }
-            .alert(
-                "Entrenamientos",
-                isPresented: Binding(
-                    get: { errorMessage != nil },
-                    set: { if !$0 { errorMessage = nil } }
-                ),
-                presenting: errorMessage
-            ) { _ in
-                Button("OK") {}
-            } message: { message in
-                Text(message)
-            }
         }
-    }
-
-    private func load() async {
-        isLoading = true
-        errorMessage = nil
-        do {
-            let service = RemoteTrackingService(client: authManager.makeAPIClient())
-            workouts = try await service.listWorkouts().sorted { $0.startedAt > $1.startedAt }
-        } catch {
-            errorMessage = (error as? NetworkError)?.userMessage ?? error.localizedDescription
-        }
-        isLoading = false
     }
 }
 

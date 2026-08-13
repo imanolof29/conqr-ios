@@ -14,6 +14,16 @@ enum ActivityType: String, CaseIterable, Identifiable, Codable, Equatable {
 
     var id: Self { self }
 
+    /// Backend (nest/conqr) ActivityType enum values — distinct from the
+    /// lowercase raw value used for local persistence.
+    var remoteValue: String {
+        switch self {
+        case .walk: "WALKING"
+        case .run: "RUNNING"
+        case .cycle: "CYCLING"
+        }
+    }
+
     var title: String {
         switch self {
         case .walk:

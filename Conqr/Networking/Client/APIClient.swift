@@ -90,7 +90,32 @@ private struct APIErrorPayload: Decodable {
 extension JSONDecoder {
     static let conqrDefault: JSONDecoder = {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let raw = try container.decode(String.self)
+            if let date = ISO8601DateFormatter.withFractionalSeconds.date(from: raw) {
+                return date
+            }
+            if let date = ISO8601DateFormatter.plain.date(from: raw) {
+                return date
+            }
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Expected ISO8601 date string, got \(raw)"
+            )
+        }
         return decoder
     }()
+}
+
+private extension ISO8601DateFormatter {
+    // NestJS/TypeORM serialize Date fields with millisecond precision
+    // (e.g. "2026-08-13T10:00:00.123Z") — the plain ISO8601 formatter rejects those.
+    static let withFractionalSeconds: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    static let plain = ISO8601DateFormatter()
 }

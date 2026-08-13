@@ -9,45 +9,20 @@ import SwiftUI
 import MapKit
 
 struct WorkoutDetailView: View {
-    let workoutId: String
-
-    @Environment(AuthManager.self) private var authManager
-
-    @State private var workout: WorkoutDTO?
-    @State private var errorMessage: String?
+    let workout: ActivityRecord
 
     var body: some View {
-        Group {
-            if let workout {
-                content(for: workout)
-            } else if let errorMessage {
-                ContentUnavailableView(
-                    "No se pudo cargar",
-                    systemImage: "exclamationmark.triangle",
-                    description: Text(errorMessage)
-                )
-            } else {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-        }
-        .navigationTitle("Entrenamiento")
-        .navigationBarTitleDisplayMode(.inline)
-        .task { await load() }
-    }
-
-    private func content(for workout: WorkoutDTO) -> some View {
         ScrollView {
             VStack(spacing: 16) {
                 HStack(spacing: 14) {
-                    Image(systemName: "figure.mixed.cardio")
+                    Image(systemName: workout.activityType.icon)
                         .font(.system(size: 28, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 64, height: 64)
-                        .glassEffect(.regular.tint(.blue), in: .circle)
+                        .glassEffect(.regular.tint(workout.activityType.color), in: .circle)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(workout.startedAt.formatted(date: .abbreviated, time: .shortened))
+                        Text(workout.startDate.formatted(date: .abbreviated, time: .shortened))
                             .font(.headline)
 
                         Text(workout.status.title)
@@ -56,9 +31,15 @@ struct WorkoutDetailView: View {
                     }
 
                     Spacer()
+
+                    if !workout.synced {
+                        Image(systemName: "icloud.slash")
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
-                if let coordinates = routeCoordinates(workout.polyline), coordinates.count > 1 {
+                let coordinates = workout.coordinates
+                if coordinates.count > 1 {
                     Map(initialPosition: .region(region(fitting: coordinates))) {
                         MapPolyline(coordinates: coordinates)
                             .stroke(.blue, lineWidth: 4)
@@ -71,12 +52,12 @@ struct WorkoutDetailView: View {
                     detailRow(icon: "ruler", title: "Distancia", value: workout.formattedDistance)
                     Divider()
                     detailRow(icon: "clock", title: "Duración", value: workout.formattedDuration)
-                    if let endedAt = workout.endedAt {
+                    if let endDate = workout.endDate {
                         Divider()
                         detailRow(
                             icon: "flag.checkered",
                             title: "Finalizado",
-                            value: endedAt.formatted(date: .abbreviated, time: .shortened)
+                            value: endDate.formatted(date: .abbreviated, time: .shortened)
                         )
                     }
                 }
@@ -85,11 +66,8 @@ struct WorkoutDetailView: View {
             }
             .padding(16)
         }
-    }
-
-    private func routeCoordinates(_ polyline: String?) -> [CLLocationCoordinate2D]? {
-        guard let polyline, !polyline.isEmpty else { return nil }
-        return PolylineDecoder.decode(polyline)
+        .navigationTitle("Entrenamiento")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private func region(fitting coordinates: [CLLocationCoordinate2D]) -> MKCoordinateRegion {
@@ -118,21 +96,11 @@ struct WorkoutDetailView: View {
         }
         .padding(.vertical, 10)
     }
-
-    private func load() async {
-        errorMessage = nil
-        do {
-            let service = RemoteTrackingService(client: authManager.makeAPIClient())
-            workout = try await service.getWorkoutById(id: workoutId)
-        } catch {
-            errorMessage = (error as? NetworkError)?.userMessage ?? error.localizedDescription
-        }
-    }
 }
 
 #Preview {
     NavigationStack {
-        WorkoutDetailView(workoutId: UUID().uuidString)
+        WorkoutDetailView(workout: ActivityRecord(type: .run))
     }
     .environment(AuthManager())
 }

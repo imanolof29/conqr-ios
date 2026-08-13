@@ -10,12 +10,15 @@ import Foundation
 enum TrackingEndpoint {
     case workouts
     case workout(id: String)
+    case finishWorkout(id: String)
 
     var path: String {
         switch self {
-        case .workouts: return "tracking/workouts"
+        case .workouts: return "workouts"
         case .workout(id: let id):
-            return "tracking/workouts/\(id)"
+            return "workouts/\(id)"
+        case .finishWorkout(id: let id):
+            return "workouts/\(id)/finish"
         }
     }
 }
