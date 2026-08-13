@@ -65,7 +65,9 @@ final class TrackingSocketService: TrackingSocketServicing {
         socket.on("workout:point:ack") { [weak self] data, _ in
             guard let dict = data.first as? [String: Any],
                   let distanceMeters = dict["distanceMeters"] as? Double else { return }
-            self?.onPointAck?(distanceMeters)
+            Task { @MainActor [weak self] in
+                self?.onPointAck?(distanceMeters)
+            }
         }
     }
 
@@ -76,7 +78,7 @@ final class TrackingSocketService: TrackingSocketServicing {
             socket.once("workout:started") { data, _ in
                 guard let dict = data.first as? [String: Any],
                       let workoutId = dict["workoutId"] as? String else { return }
-                resume(workoutId)
+                Task { @MainActor in resume(workoutId) }
             }
             socket.emit("workout:start")
         }
@@ -96,11 +98,12 @@ final class TrackingSocketService: TrackingSocketServicing {
                 guard let dict = data.first as? [String: Any],
                       let id = dict["workoutId"] as? String,
                       let distanceMeters = dict["distanceMeters"] as? Double else { return }
-                resume(FinishedWorkoutPayload(
+                let payload = FinishedWorkoutPayload(
                     workoutId: id,
                     distanceMeters: distanceMeters,
                     polyline: dict["polyline"] as? String
-                ))
+                )
+                Task { @MainActor in resume(payload) }
             }
             socket.emit("workout:finish", ["workoutId": workoutId])
         }
@@ -117,7 +120,7 @@ final class TrackingSocketService: TrackingSocketServicing {
         guard socket.status != .connected else { return }
 
         let result: Result<Void, TrackingSocketError> = await withTimeout { [socket] resume in
-            socket.once(clientEvent: .connect) { _, _ in resume(()) }
+            socket.once(clientEvent: .connect) { _, _ in Task { @MainActor in resume(()) } }
             socket.connect()
         }
         if case .failure = result {

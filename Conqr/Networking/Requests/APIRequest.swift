@@ -19,7 +19,7 @@ struct EmptyResponse: Decodable {}
 
 struct APIRequest<Response: Decodable> {
     let method: HTTPMethod
-    let route: APIRoute
+    let path: String
     var queryItems: [URLQueryItem]
     var headers: [String: String]
     var body: Data?
@@ -27,14 +27,14 @@ struct APIRequest<Response: Decodable> {
 
     init(
         method: HTTPMethod,
-        route: APIRoute,
+        path: String,
         queryItems: [URLQueryItem] = [],
         headers: [String: String] = [:],
         requiresAuth: Bool = true,
         body: Data? = nil
     ) {
         self.method = method
-        self.route = route
+        self.path = path
         self.queryItems = queryItems
         self.headers = headers
         self.requiresAuth = requiresAuth
@@ -43,7 +43,7 @@ struct APIRequest<Response: Decodable> {
 
     init<Body: Encodable>(
         method: HTTPMethod,
-        route: APIRoute,
+        path: String,
         queryItems: [URLQueryItem] = [],
         headers: [String: String] = [:],
         requiresAuth: Bool = true,
@@ -56,7 +56,7 @@ struct APIRequest<Response: Decodable> {
             throw NetworkError.encodingFailed(String(describing: error))
         }
         self.method = method
-        self.route = route
+        self.path = path
         self.queryItems = queryItems
         self.headers = headers
         self.requiresAuth = requiresAuth
@@ -64,7 +64,7 @@ struct APIRequest<Response: Decodable> {
 
     func makeURLRequest(baseURL: URL, defaultHeaders: [String: String] = [:]) throws -> URLRequest {
         guard var components = URLComponents(
-            url: baseURL.appendingPathComponent(route.path),
+            url: baseURL.appendingPathComponent(path),
             resolvingAgainstBaseURL: false
         ) else {
             throw NetworkError.invalidURL

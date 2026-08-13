@@ -15,7 +15,7 @@ struct APIClient: APIClientProtocol {
     let baseURL: URL
     var session: URLSession = .shared
     var decoder: JSONDecoder = .conqrDefault
-    var tokenProvider: () -> String?
+    var tokenProvider: @Sendable () -> String?
 
     func execute<Response: Decodable>(_ requestModel: APIRequest<Response>) async throws -> Response {
         var defaultHeaders = [
@@ -33,7 +33,18 @@ struct APIClient: APIClientProtocol {
         let request = try requestModel.makeURLRequest(baseURL: baseURL, defaultHeaders: defaultHeaders)
 
         let (data, response) = try await perform(request)
-        try validate(response, data: data)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.transport("Response was not an HTTP response.")
+        }
+        switch httpResponse.statusCode {
+        case 200..<300:
+            break
+        case 401:
+            throw NetworkError.unauthorized
+        default:
+            throw NetworkError.server(statusCode: httpResponse.statusCode, message: friendlyMessage(from: data))
+        }
 
         if Response.self == EmptyResponse.self {
             return EmptyResponse() as! Response
@@ -51,22 +62,6 @@ struct APIClient: APIClientProtocol {
             return try await session.data(for: request)
         } catch {
             throw NetworkError.transport(String(describing: error))
-        }
-    }
-
-    private func validate(_ response: URLResponse, data: Data) throws {
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NetworkError.transport("Response was not an HTTP response.")
-        }
-
-        switch httpResponse.statusCode {
-        case 200..<300:
-            return
-        case 401:
-            throw NetworkError.unauthorized
-        default:
-            let message = friendlyMessage(from: data)
-            throw NetworkError.server(statusCode: httpResponse.statusCode, message: message)
         }
     }
 

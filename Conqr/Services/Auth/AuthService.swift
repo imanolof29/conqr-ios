@@ -24,7 +24,7 @@ struct AuthService: AuthServiceProtocol {
     func signUp(email: String, password: String) async throws -> AuthResponseDTO {
         let requestModel = try APIRequest<AuthResponseDTO>(
             method: .post,
-            route: .auth(.signUp),
+            path: AuthEndpoint.signUp.path,
             requiresAuth: false,
             body: CredentialsPayload(email: email, password: password)
         )
@@ -34,7 +34,7 @@ struct AuthService: AuthServiceProtocol {
     func signIn(email: String, password: String) async throws -> AuthResponseDTO {
         let requestModel = try APIRequest<AuthResponseDTO>(
             method: .post,
-            route: .auth(.signIn),
+            path: AuthEndpoint.signIn.path,
             requiresAuth: false,
             body: CredentialsPayload(email: email, password: password)
         )
@@ -44,7 +44,7 @@ struct AuthService: AuthServiceProtocol {
     func refresh(refreshToken: String) async throws -> AuthResponseDTO {
         let requestModel = try APIRequest<AuthResponseDTO>(
             method: .post,
-            route: .auth(.refresh),
+            path: AuthEndpoint.refresh.path,
             requiresAuth: false,
             body: RefreshPayload(refreshToken: refreshToken)
         )
@@ -52,7 +52,7 @@ struct AuthService: AuthServiceProtocol {
     }
 
     func signOut() async throws {
-        let requestModel = APIRequest<EmptyResponse>(method: .post, route: .auth(.signOut))
+        let requestModel = APIRequest<EmptyResponse>(method: .post, path: AuthEndpoint.signOut.path)
         _ = try await client.execute(requestModel)
     }
 }

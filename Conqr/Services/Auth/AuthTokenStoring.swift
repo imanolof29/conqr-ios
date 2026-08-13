@@ -8,14 +8,14 @@
 import Foundation
 import Security
 
-protocol AuthTokenStoring: AnyObject {
+protocol AuthTokenStoring: AnyObject, Sendable {
     var accessToken: String? { get }
     var refreshToken: String? { get }
     func save(accessToken: String, refreshToken: String)
     func clear()
 }
 
-final class KeychainTokenStore: AuthTokenStoring {
+final class KeychainTokenStore: AuthTokenStoring, Sendable {
     private let service: String
 
     init(service: String = Bundle.main.bundleIdentifier ?? "com.imanolortiz.Conqr") {

@@ -84,6 +84,17 @@ final class AuthManager {
         isAuthenticated = false
     }
 
+    /// Authenticated API client shared by other services (adds the auth header and
+    /// retries once with a refreshed token on 401, logging the user out if that fails).
+    func makeAPIClient() -> APIClientProtocol {
+        let rawClient = APIClient(baseURL: APIEnvironment.baseURL, tokenProvider: { [tokenStore] in tokenStore.accessToken })
+        return SessionRefreshingAPIClient(
+            inner: rawClient,
+            tokenStore: tokenStore,
+            onSessionExpired: { [weak self] in self?.handleSessionExpired() }
+        )
+    }
+
     private func persist(_ response: AuthResponseDTO) {
         tokenStore.save(accessToken: response.accessToken, refreshToken: response.refreshToken)
         isAuthenticated = true

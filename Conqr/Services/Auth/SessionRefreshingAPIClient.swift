@@ -50,7 +50,7 @@ final class SessionRefreshingAPIClient: APIClientProtocol {
         do {
             let requestModel = try APIRequest<AuthResponseDTO>(
                 method: .post,
-                route: .auth(.refresh),
+                path: AuthEndpoint.refresh.path,
                 requiresAuth: false,
                 body: RefreshPayload(refreshToken: refreshToken)
             )

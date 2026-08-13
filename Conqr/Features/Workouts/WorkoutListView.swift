@@ -9,7 +9,7 @@ import SwiftUI
 
 struct WorkoutListView: View {
 
-    private let service: RemoteTrackingServicing = RemoteTrackingService()
+    @Environment(AuthManager.self) private var authManager
 
     @State private var workouts: [WorkoutDTO] = []
     @State private var isLoading = false
@@ -31,7 +31,12 @@ struct WorkoutListView: View {
                     ScrollView {
                         VStack(spacing: 12) {
                             ForEach(workouts) { workout in
-                                WorkoutRow(workout: workout)
+                                NavigationLink {
+                                    WorkoutDetailView(workoutId: workout.id)
+                                } label: {
+                                    WorkoutRow(workout: workout)
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
                         .padding(16)
@@ -45,7 +50,7 @@ struct WorkoutListView: View {
                 "Entrenamientos",
                 isPresented: Binding(
                     get: { errorMessage != nil },
-                    set: { if !$0 { } }
+                    set: { if !$0 { errorMessage = nil } }
                 ),
                 presenting: errorMessage
             ) { _ in
@@ -60,6 +65,7 @@ struct WorkoutListView: View {
         isLoading = true
         errorMessage = nil
         do {
+            let service = RemoteTrackingService(client: authManager.makeAPIClient())
             workouts = try await service.listWorkouts().sorted { $0.startedAt > $1.startedAt }
         } catch {
             errorMessage = (error as? NetworkError)?.userMessage ?? error.localizedDescription
@@ -70,4 +76,5 @@ struct WorkoutListView: View {
 
 #Preview {
     WorkoutListView()
+        .environment(AuthManager())
 }

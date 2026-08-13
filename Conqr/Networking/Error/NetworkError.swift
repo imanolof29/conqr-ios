@@ -46,23 +46,5 @@ enum NetworkError: Error, LocalizedError, Equatable {
         }
     }
 
-    /// Verbose, developer-facing message.
-    var debugMessage: String {
-        switch self {
-        case .invalidURL:
-            return "Invalid URL"
-        case .encodingFailed(let reason):
-            return "Encoding failed: \(reason)"
-        case .decodingFailed(let reason):
-            return "Decoding failed: \(reason)"
-        case .unauthorized:
-            return "Unauthorized (401)"
-        case .server(let statusCode, let message):
-            return "HTTP \(statusCode)\(message.map { ": \($0)" } ?? "")"
-        case .transport(let reason):
-            return "Transport error: \(reason)"
-        }
-    }
-
     var errorDescription: String? { userMessage }
 }
