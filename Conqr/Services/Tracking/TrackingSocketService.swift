@@ -54,14 +54,13 @@ final class TrackingSocketService: TrackingSocketServicing {
     var onServerError: ((String) -> Void)?
 
     init(
-        baseURL: URL = APIEnvironment.baseURL,
-        tokenStore: AuthTokenStoring = KeychainTokenStore(),
+        baseURL: URL = URL(string: APIConfig.baseUrl)!,
         connectTimeout: Double = 10
     ) {
         self.connectTimeout = connectTimeout
 
         var config: SocketIOClientConfiguration = [.log(false), .compress, .forceWebsockets(true)]
-        if let token = tokenStore.accessToken {
+        if let token = TokenStorage.shared.accessToken() {
             config.insert(.extraHeaders(["Authorization": "Bearer \(token)"]))
         }
 

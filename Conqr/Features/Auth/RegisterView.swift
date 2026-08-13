@@ -111,5 +111,5 @@ struct RegisterView: View {
 
 #Preview {
     RegisterView()
-        .environment(AuthManager(tokenStore: KeychainTokenStore()))
+        .environment(AuthManager(client: NetworkClient()))
 }

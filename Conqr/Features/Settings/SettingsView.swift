@@ -73,6 +73,6 @@ struct SettingsView: View {
 #Preview {
     NavigationStack {
         SettingsView()
-            .environment(AuthManager(tokenStore: KeychainTokenStore()))
+            .environment(AuthManager(client: NetworkClient()))
     }
 }

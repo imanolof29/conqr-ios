@@ -2,7 +2,7 @@
 //  AuthManager.swift
 //  Conqr
 //
-//  Created by Imanol Ortiz on 12/08/2026.
+//  Created by Imanol Ortiz on 13/08/2026.
 //
 
 import Foundation
@@ -14,52 +14,23 @@ enum AuthOperation: Equatable {
     case signOut
 }
 
-
 @MainActor
 @Observable
 final class AuthManager {
     private(set) var isAuthenticated: Bool
     var authState: MutationState<AuthOperation> = .idle
 
-    private let tokenStore: AuthTokenStoring
-    private var service: AuthServiceProtocol
+    private let client: NetworkClientProtocol
 
-    init(tokenStore: AuthTokenStoring = KeychainTokenStore()) {
-        self.tokenStore = tokenStore
-        self.isAuthenticated = tokenStore.accessToken != nil
-
-        let rawClient = APIClient(baseURL: APIEnvironment.baseURL, tokenProvider: { tokenStore.accessToken })
-        self.service = AuthService(client: rawClient)
-
-        let refreshingClient = SessionRefreshingAPIClient(
-            inner: rawClient,
-            tokenStore: tokenStore,
-            onSessionExpired: { [weak self] in self?.handleSessionExpired() }
-        )
-        self.service = AuthService(client: refreshingClient)
-    }
-
-    init(service: AuthServiceProtocol, tokenStore: AuthTokenStoring) {
-        self.service = service
-        self.tokenStore = tokenStore
-        self.isAuthenticated = tokenStore.accessToken != nil
-    }
-
-    func signUp(email: String, password: String) async {
-        authState = .inProgress(.signUp)
-        do {
-            let response = try await service.signUp(email: email, password: password)
-            persist(response)
-            authState = .succeeded(.signUp)
-        } catch {
-            authState = .failed(.signUp, message(for: error))
-        }
+    init(client: NetworkClientProtocol) {
+        self.client = client
+        self.isAuthenticated = TokenStorage.shared.accessToken() != nil
     }
 
     func signIn(email: String, password: String) async {
         authState = .inProgress(.signIn)
         do {
-            let response = try await service.signIn(email: email, password: password)
+            let response = try await client.execute(LoginEndpoint(email: email, password: password))
             persist(response)
             authState = .succeeded(.signIn)
         } catch {
@@ -67,10 +38,20 @@ final class AuthManager {
         }
     }
 
+    func signUp(email: String, password: String) async {
+        authState = .inProgress(.signUp)
+        do {
+            let response = try await client.execute(RegisterEndpoint(email: email, password: password))
+            persist(response)
+            authState = .succeeded(.signUp)
+        } catch {
+            authState = .failed(.signUp, message(for: error))
+        }
+    }
+
     func signOut() async {
         authState = .inProgress(.signOut)
-        try? await service.signOut()
-        tokenStore.clear()
+        TokenStorage.shared.clear()
         isAuthenticated = false
         authState = .succeeded(.signOut)
     }
@@ -79,28 +60,12 @@ final class AuthManager {
         authState = .idle
     }
 
-    func handleSessionExpired() {
-        tokenStore.clear()
-        isAuthenticated = false
-    }
-
-    /// Authenticated API client shared by other services (adds the auth header and
-    /// retries once with a refreshed token on 401, logging the user out if that fails).
-    func makeAPIClient() -> APIClientProtocol {
-        let rawClient = APIClient(baseURL: APIEnvironment.baseURL, tokenProvider: { [tokenStore] in tokenStore.accessToken })
-        return SessionRefreshingAPIClient(
-            inner: rawClient,
-            tokenStore: tokenStore,
-            onSessionExpired: { [weak self] in self?.handleSessionExpired() }
-        )
-    }
-
     private func persist(_ response: AuthResponseDTO) {
-        tokenStore.save(accessToken: response.accessToken, refreshToken: response.refreshToken)
+        TokenStorage.shared.save(accesss: response.accessToken, refresh: response.refreshToken)
         isAuthenticated = true
     }
 
     private func message(for error: Error) -> String {
-        (error as? NetworkError)?.userMessage ?? error.localizedDescription
+        (error as? NetworkError)?.errorDescription ?? error.localizedDescription
     }
 }

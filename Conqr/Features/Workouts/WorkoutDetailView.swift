@@ -102,5 +102,5 @@ struct WorkoutDetailView: View {
     NavigationStack {
         WorkoutDetailView(workout: ActivityRecord(type: .run))
     }
-    .environment(AuthManager())
+    .environment(AuthManager(client: NetworkClient()))
 }

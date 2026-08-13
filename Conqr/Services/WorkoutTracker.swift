@@ -32,10 +32,8 @@ final class WorkoutTracker {
     init(
         locationService: LocationService,
         modelContext: ModelContext,
-        trackingSocket: TrackingSocketServicing = TrackingSocketService(),
-        remoteTrackingService: RemoteTrackingServicing = RemoteTrackingService(
-            client: APIClient(baseURL: APIEnvironment.baseURL, tokenProvider: { KeychainTokenStore().accessToken })
-        )
+        remoteTrackingService: RemoteTrackingServicing,
+        trackingSocket: TrackingSocketServicing = TrackingSocketService()
     ) {
         self.locationService = locationService
         self.modelContext = modelContext
@@ -120,7 +118,7 @@ final class WorkoutTracker {
             do {
                 try await trackingSocket.connect()
                 let workout = try await remoteTrackingService.startWorkout(activityType: activity.activityType)
-                guard self.activeActivity === activity else { return } // finished/cancelled meanwhile
+                guard self.activeActivity === activity else { return }
                 self.remoteWorkoutId = workout.id
                 activity.remoteID = workout.id
             } catch {

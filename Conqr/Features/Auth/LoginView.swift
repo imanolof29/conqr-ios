@@ -88,5 +88,5 @@ struct LoginView: View {
 
 #Preview {
     LoginView()
-        .environment(AuthManager(tokenStore: KeychainTokenStore()))
+        .environment(AuthManager(client: NetworkClient()))
 }

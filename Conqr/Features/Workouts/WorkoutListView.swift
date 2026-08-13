@@ -47,5 +47,5 @@ struct WorkoutListView: View {
 
 #Preview {
     WorkoutListView()
-        .environment(AuthManager())
+        .environment(AuthManager(client: NetworkClient()))
 }

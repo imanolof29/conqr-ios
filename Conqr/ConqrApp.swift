@@ -10,7 +10,16 @@ import SwiftData
 
 @main
 struct ConqrApp: App {
-    @State private var authManager = AuthManager()
+    // Single NetworkClient for the whole app — created once here, then
+    // handed to AuthManager and exposed via environment for everything else.
+    private let networkClient: NetworkClient
+    @State private var authManager: AuthManager
+
+    init() {
+        let networkClient = NetworkClient()
+        self.networkClient = networkClient
+        _authManager = State(initialValue: AuthManager(client: networkClient))
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -35,6 +44,7 @@ struct ConqrApp: App {
                 }
             }
             .environment(authManager)
+            .environment(\.networkClient, networkClient)
         }
         .modelContainer(for: [ActivityRecord.self, RouteLocation.self])
     }

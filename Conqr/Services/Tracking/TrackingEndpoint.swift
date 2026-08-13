@@ -14,11 +14,11 @@ enum TrackingEndpoint {
 
     var path: String {
         switch self {
-        case .workouts: return "workouts"
+        case .workouts: return "/workouts"
         case .workout(id: let id):
-            return "workouts/\(id)"
+            return "/workouts/\(id)"
         case .finishWorkout(id: let id):
-            return "workouts/\(id)/finish"
+            return "/workouts/\(id)/finish"
         }
     }
 }
